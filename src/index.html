@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>United Home Buyers - Property Survey</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: transparent;
+            padding: 0;
+            margin: 0;
+            min-height: auto;
+            display: flex;
+            justify-content: center;
+        }
+        
+        .survey-container {
+            max-width: 600px;
+            margin: 0;
+            background: white;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 40px;
+            width: 100%;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #003D7A;
+            padding-bottom: 20px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            color: #003D7A;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .step {
+            display: none;
+        }
+        
+        .step.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .step-number {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        h2 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #003D7A;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 15px;
+            font-size: 16px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            transition: border-color 0.3s;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #003D7A;
+        }
+        
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .option-button {
+            padding: 18px 24px;
+            font-size: 16px;
+            font-weight: 500;
+            background: #f5f5f5;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: left;
+        }
+        
+        .option-button:hover {
+            background: #e8f0ff;
+            border-color: #003D7A;
+            transform: translateX(5px);
+        }
+        
+        .continue-button {
+            width: 100%;
+            padding: 18px;
+            font-size: 18px;
+            font-weight: 600;
+            background: #003D7A;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        
+        .continue-button:hover {
+            background: #002850;
+        }
+        
+        .branded-footer {
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid #e0e0e0;
+            text-align: center;
+        }
+        
+        .founder-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .founder-photo {
+            width: 70px;
+            height: 70px;
+            border-radius: 8px;
+            object-fit: cover;
+            border: 2px solid #003D7A;
+        }
+        
+        .founder-text {
+            text-align: left;
+        }
+        
+        .founder-name {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #003D7A;
+        }
+        
+        .founder-title {
+            margin: 4px 0 0 0;
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+        }
+        
+        .back-button {
+            background: transparent;
+            border: none;
+            color: #666;
+            font-size: 14px;
+            cursor: pointer;
+            margin-bottom: 15px;
+            padding: 8px 0;
+        }
+        
+        .back-button:hover {
+            color: #003D7A;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #003D7A;
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+        
+        .input-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .disqualify-message {
+            text-align: center;
+            padding: 40px 20px;
+        }
+        
+        .disqualify-message h2 {
+            color: #003D7A;
+            margin-bottom: 20px;
+        }
+        
+        .disqualify-message p {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        
+    </style>
+    
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCDtN-QzZ8zcoKOhxQLD4HKcWEiY39Xqcs&libraries=places"></script>
+</head>
+<body>
+    <div class="survey-container">
+        <div class="header">
+            <h1>United Home Buyers</h1>
+            <p>Fast Cash for Your Property</p>
+        </div>
+        
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+        
+        <!-- Step 1: Address -->
+        <div class="step active" data-step="1">
+            <div class="step-number">Question 1 of 5</div>
+            <h2>What's the property address?</h2>
+            <input type="text" class="input-field" id="address" placeholder="Enter your property address" required autocomplete="off">
+            <button class="continue-button" onclick="validateAndContinue()">Continue →</button>
+        </div>
+        
+        <!-- Step 2: Market Status -->
+        <div class="step" data-step="2">
+            <button class="back-button" onclick="goBack()">← Back</button>
+            <div class="step-number">Question 2 of 5</div>
+            <h2>Is this home currently listed on the market?</h2>
+            <div class="button-group">
+                <button class="option-button" onclick="selectOption('marketStatus', 'Not listed')">
+                    No, it's not listed on the market
+                </button>
+                <button class="option-button" onclick="disqualify('marketStatus', 'Listed with realtor')">
+                    Yes, it's listed with a realtor
+                </button>
+                <button class="option-button" onclick="disqualify('marketStatus', 'For sale by owner')">
+                    Yes, it's listed for sale by owner
+                </button>
+            </div>
+        </div>
+        
+        <!-- Step 3: Property Type -->
+        <div class="step" data-step="3">
+            <button class="back-button" onclick="goBack()">← Back</button>
+            <div class="step-number">Question 3 of 5</div>
+            <h2>What type of property do you have?</h2>
+            <div class="button-group">
+                <button class="option-button" onclick="selectOption('propertyType', 'Single Family')">
+                    Single Family Home
+                </button>
+                <button class="option-button" onclick="selectOption('propertyType', 'Multi-Family')">
+                    Multi-Family Property
+                </button>
+                <button class="option-button" onclick="disqualify('propertyType', 'Condo/Townhouse')">
+                    Condo / Townhouse
+                </button>
+                <button class="option-button" onclick="disqualify('propertyType', 'Mobile Home')">
+                    Mobile Home
+                </button>
+                <button class="option-button" onclick="disqualify('propertyType', 'Commercial')">
+                    Commercial Property
+                </button>
+                <button class="option-button" onclick="disqualify('propertyType', 'Land')">
+                    Land / Vacant Lot
+                </button>
+            </div>
+        </div>
+        
+        <!-- Step 4: Motivation -->
+        <div class="step" data-step="4">
+            <button class="back-button" onclick="goBack()">← Back</button>
+            <div class="step-number">Question 4 of 5</div>
+            <h2>What's your primary reason for selling?</h2>
+            <div class="button-group">
+                <button class="option-button" onclick="selectOption('motivation', 'Inheritance')">
+                    Inheritance
+                </button>
+                <button class="option-button" onclick="selectOption('motivation', 'Foreclosure')">
+                    Foreclosure
+                </button>
+                <button class="option-button" onclick="selectOption('motivation', 'Downsizing')">
+                    Downsizing
+                </button>
+                <button class="option-button" onclick="selectOption('motivation', 'Relocation')">
+                    Relocation
+                </button>
+                <button class="option-button" onclick="selectOption('motivation', 'Financial hardship')">
+                    Financial hardship
+                </button>
+                <button class="option-button" onclick="selectOption('motivation', 'Other')">
+                    Other
+                </button>
+            </div>
+        </div>
+        
+        <!-- Step 5: Condition -->
+        <div class="step" data-step="5">
+            <button class="back-button" onclick="goBack()">← Back</button>
+            <div class="step-number">Question 5 of 5</div>
+            <h2>How would you describe your home's condition?</h2>
+            <div class="button-group">
+                <button class="option-button" onclick="selectOption('condition', 'Move-in ready')">
+                    Move-in ready — Updated and well-maintained
+                </button>
+                <button class="option-button" onclick="selectOption('condition', 'Livable but dated')">
+                    Livable but dated — Needs cosmetic updates
+                </button>
+                <button class="option-button" onclick="selectOption('condition', 'Needs repairs')">
+                    Needs repairs — Minor to moderate work required
+                </button>
+                <button class="option-button" onclick="selectOption('condition', 'Major repairs needed')">
+                    Major repairs needed — Significant renovation required
+                </button>
+            </div>
+        </div>
+        
+        <!-- Step 6: Contact Info -->
+        <div class="step" data-step="6">
+            <button class="back-button" onclick="goBack()">← Back</button>
+            <div class="step-number">Final Step</div>
+            <h2>Where should we send your cash offer?</h2>
+            <div class="input-row">
+                <input type="text" class="input-field" id="firstName" placeholder="First name" required>
+                <input type="text" class="input-field" id="lastName" placeholder="Last name" required>
+            </div>
+            <input type="email" class="input-field" id="email" placeholder="Email address" required>
+            <input type="tel" class="input-field" id="phone" placeholder="Phone number" required>
+            <button class="continue-button" onclick="submitForm()">Get My Cash Offer Now →</button>
+            
+            <!-- United Home Buyers Branding -->
+            <div class="branded-footer">
+                <div class="founder-section">
+                    <img src="gary-headshot.jpg" alt="Gary, United Home Buyers" class="founder-photo">
+                    <div class="founder-text">
+                        <p class="founder-name">Gary</p>
+                        <p class="founder-title">United Home Buyers</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Disqualification Step -->
+        <div class="step" data-step="disqualify">
+            <div class="disqualify-message">
+                <h2>Thank you for your interest</h2>
+                <p>Unfortunately, we are not currently purchasing properties that match your criteria.</p>
+                <p>We appreciate you reaching out and wish you the best in selling your property.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentStep = 1;
+        const totalSteps = 6;
+        const formData = {};
+        var addressValidated = { address: false };
+        
+        function initAutocomplete(inputId) {
+            var input = document.getElementById(inputId);
+            if (!input) return;
+            
+            var options = {
+                types: ['address'],
+                componentRestrictions: { country: 'us' }
+            };
+            
+            var autocomplete = new google.maps.places.Autocomplete(input, options);
+            autocomplete.setFields(['formatted_address']);
+            
+            input.addEventListener('input', function() {
+                addressValidated[inputId] = false;
+            });
+            
+            autocomplete.addListener('place_changed', function() {
+                var place = autocomplete.getPlace();
+                if (place && place.formatted_address) {
+                    input.value = place.formatted_address;
+                    addressValidated[inputId] = true;
+                    input.setAttribute('readonly', 'readonly');
+                    input.style.backgroundColor = '#f0f0f0';
+                    formData.address = input.value;
+                    currentStep++;
+                    showStep(currentStep);
+                }
+            });
+            
+            input.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault();
+                }
+            });
+        }
+        
+        window.addEventListener('DOMContentLoaded', function() {
+            initAutocomplete('address');
+            updateProgress();
+        });
+        
+        function validateAddressSelected(inputId) {
+            if (!addressValidated[inputId]) {
+                alert('Please select an address from the dropdown suggestions.');
+                return false;
+            }
+            return true;
+        }
+        
+        function showStep(step) {
+            document.querySelectorAll('.step').forEach(el => el.classList.remove('active'));
+            document.querySelector(`[data-step="${step}"]`).classList.add('active');
+            if (step !== 'disqualify') {
+                updateProgress();
+            }
+        }
+        
+        function updateProgress() {
+            const progress = (currentStep / totalSteps) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+        }
+        
+        function validateAndContinue() {
+            if (!validateAddressSelected('address')) return;
+            const address = document.getElementById('address').value.trim();
+            if (!address) {
+                alert('Please enter your property address');
+                return;
+            }
+            formData.address = address;
+            currentStep++;
+            showStep(currentStep);
+        }
+        
+        function selectOption(field, value) {
+            formData[field] = value;
+            currentStep++;
+            showStep(currentStep);
+        }
+        
+        function disqualify(field, value) {
+            formData[field] = value;
+            showStep('disqualify');
+        }
+        
+        function goBack() {
+            if (currentStep > 1) {
+                currentStep--;
+                showStep(currentStep);
+            }
+        }
+        
+        function submitForm() {
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            
+            if (!firstName || !lastName || !email || !phone) {
+                alert('Please fill in all fields');
+                return;
+            }
+            
+            // Format payload for LeadConnector
+            const payload = {
+                firstName: firstName,
+                lastName: lastName,
+                email: email,
+                phone: phone,
+                customFields: {
+                    address: formData.address || '',
+                    marketStatus: formData.marketStatus || '',
+                    propertyType: formData.propertyType || '',
+                    motivation: formData.motivation || '',
+                    condition: formData.condition || '',
+                    source: 'United Home Buyers Survey',
+                    company: 'United Home Buyers'
+                }
+            };
+            
+            // United Home Buyers webhook
+            const webhookURL = 'https://services.leadconnectorhq.com/hooks/ycJ4omaA1KD5znzGgZIN/webhook-trigger/9499902b-7974-419a-8495-a33189d0e964';
+            
+            fetch(webhookURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(response => {
+                window.location.href = 'https://realestate.uhbbuyshomes.com/thank-you-page-446746';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('There was an error submitting your information. Please try again.');
+            });
+        }
+    </script>
+</body>
+</html>
