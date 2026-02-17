@@ -350,7 +350,7 @@
                 <input type="text" class="input-field" id="lastName" placeholder="Last name" required>
             </div>
             <input type="email" class="input-field" id="email" placeholder="Email address" required>
-            <input type="tel" class="input-field" id="phone" placeholder="Phone number" required>
+            <input type="tel" class="input-field" id="phone" placeholder="(555) 555-5555" required maxlength="14" oninput="formatPhone(this)">
             <button class="continue-button" onclick="submitForm()">Get My Cash Offer Now →</button>
             
             <!-- United Home Buyers Branding -->
@@ -473,16 +473,29 @@
             }
         }
         
-        function submitForm() {
-            const firstName = document.getElementById('firstName').value;
-            const lastName = document.getElementById('lastName').value;
-            const email = document.getElementById('email').value;
-            const phone = document.getElementById('phone').value;
-            
-            if (!firstName || !lastName || !email || !phone) {
-                alert('Please fill in all fields');
-                return;
+        function formatPhone(input) {
+            let digits = input.value.replace(/\D/g, '');
+            if (digits.length > 10) digits = digits.substring(0, 10);
+            if (digits.length >= 7) {
+                input.value = '(' + digits.substring(0, 3) + ') ' + digits.substring(3, 6) + '-' + digits.substring(6);
+            } else if (digits.length >= 4) {
+                input.value = '(' + digits.substring(0, 3) + ') ' + digits.substring(3);
+            } else if (digits.length > 0) {
+                input.value = '(' + digits;
             }
+        }
+
+        function submitForm() {
+            const firstName = document.getElementById('firstName').value.trim();
+            const lastName = document.getElementById('lastName').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const phoneDigits = phone.replace(/\D/g, '');
+
+            if (!firstName) { alert('Please enter your first name'); return; }
+            if (!lastName) { alert('Please enter your last name'); return; }
+            if (!email || !email.includes('@') || !email.includes('.')) { alert('Please enter a valid email address'); return; }
+            if (phoneDigits.length < 10) { alert('Please enter a valid 10-digit phone number'); return; }
             
             // Format payload for LeadConnector
             const payload = {
